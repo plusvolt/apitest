@@ -55,38 +55,12 @@ vw.Object.prototype.remove = function(name){
  *객체 복제
  */
 vw.Object.prototype.clone = function(){
-
-	 if(this === null || typeof(this) !== 'object' || 'isActiveClone' in this)
-        return this;
-
-    var temp = this.constructor(); // changed
-
-    for(var key in this) {
-        if(Object.prototype.hasOwnProperty.call(this, key)) {
-            this['isActiveClone'] = null;
-            temp[key] = clone(this[key]);
-            delete this['isActiveClone'];
-        }
-    }    
-
-    return temp;
-
-
-	/*
     if (null == this || "object" != typeof this) return this;
-    
-    var obj = this;
-    
-    function getClone(obj){
-       	return obj.constructor();
+    var copy = new vw.Object();
+    for (var attr in this) {
+        if (this.hasOwnProperty(attr)) copy[attr] = this[attr];
     }
-    
-    var cloneObj = getClone(this);
-	console.log(cloneObj)    ;
-    for (var attr in cloneObj) {
-        if (this.hasOwnProperty(cloneObj)) cobj[attr] = cloneObj[attr];
-    }
-    return cloneObj;*/
+    return copy;
 };
 
 vw.Object.prototype.equals = function(obj){
@@ -98,7 +72,83 @@ vw.Object.prototype.equals = function(obj){
 };
 
 
-function loger(arg){
+ /*
+  * 실세계 좌표 구조체
+  */
+
+vw.Coord = {    
+    x : null,
+    y : null
+}
+
+
+vw.CoordZ = {    
+    x : null,
+    y : null,
+    z : null
+}
+
+
+vw.CoordM = {    
+    x : null,
+    y : null,
+    m : null
+}
+
+
+vw.CoordZM = {    
+    x : null,
+    y : null,
+    z : null,
+    m : null
+}
+
+/*화면의 픽셀 좌표*/
+vw.Pixel = {
+    x : null,
+    y : null
+}
+
+/*실세계 좌표와 화면좌표가 Pair로 처리될 때 사용*/
+vw.CoordPixel = {
+    coord : null, // vw.Coord
+    pixel : null //vw.Pixcel
+}
+
+
+/*
+ *크기(폭과 높이)를 표현하는 클래스
+ */
+vw.Size = function(pWidth, pHeight){
+    this.width = pWidth;
+    this.height = pHeight;
+    this.fromConers = function(start, end){
+        var rSize = start - end; //좌표로 사이즈 구해야함
+        return rSize;
+    }
+    this.clone = function(){
+        if (null == this || "object" != typeof this) return this;
+            var copy = new vw.Size();
+            for (var attr in this) {
+                if (this.hasOwnProperty(attr)) copy[attr] = this[attr];
+            }
+        return copy;       
+    }
+}
+
+vw.Size.prototype = new vw.Object();
+
+
+
+
+
+
+
+
+
+
+//이 밑으로 테스트 소스
+
 	for(var i = 0; i < arg.length; i ++){
 		if( "object" == typeof arg[i]){
 			for(var name in arg[i]){
@@ -118,16 +168,35 @@ tobj.set("나이" , 18);
 tobj.set("하는일" , "게임");
 
 
-function testclass(){
-	var hoho = "2222";
+function testclass(){}
+testclass.prototype = new vw.Object();
+testclass.prototype.clone = function(){
+        if (null == this || "object" != typeof this) return this;
+        var cloneObj = new testclass();
+        for (var attr in this) {
+            if (this.hasOwnProperty(cloneObj)) this[attr] = cloneObj[attr];
+        }
+        return cloneObj;
 }
 
-testclass.prototype = new vw.Object();
-
-var hahaha = new testclass();
-
+var ha = new testclass();
+var ho = ha.clone();
 
 
+
+
+
+
+function flatClone(obj){
+    console.log("fn : " + obj.toString());
+    if (null == obj || "object" != typeof obj) return this;
+    var cloneObj = new obj.constructor();
+    for (var attr in obj) {
+        console.log(attr);
+        if (this.hasOwnProperty(cloneObj)) obj[attr] = cloneObj[attr];
+    }
+    return cloneObj;
+}
 /*
 function clone(obj) {
     if(obj === null || typeof(obj) !== 'object' || 'isActiveClone' in obj)
