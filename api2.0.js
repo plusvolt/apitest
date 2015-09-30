@@ -136,7 +136,7 @@ vw.CoordPixel = {
 
 
 /*
- *크기(폭과 높이)를 표현하는 클래스
+ *크기(폭과 높이)를 표현하는 클래스 vw.Size
  */
 vw.Size = function(pWidth, pHeight){
     this.width = pWidth;
@@ -155,10 +155,12 @@ vw.Size = function(pWidth, pHeight){
     }
 }
 
+/*vw.Object상속*/
 vw.Size.prototype = new vw.Object();
 
 /*
  *사각형 영역을 표현하는 클래스.
+ *@params pMinx 최소 x, pMiny 최소 y, pMaxx 최대 x, pMaxy 최대 y
  */
 vw.Extent = function(pMinx, pMiny, pMaxx, pMaxy){
     this.minx = pMinx;
@@ -182,6 +184,8 @@ vw.Extent = function(pMinx, pMiny, pMaxx, pMaxy){
         return copy;       
     }
 }
+
+/*vw.Size 상속*/
 vw.Extent.prototype = new vw.Size();
 
 /*값이 변할 수 있는 범위를 지정*/
@@ -261,7 +265,85 @@ vw.Object.prototype.clone = function(){
   return copy;       
 }
 
-vw.ColorRampType = function{};
+vw.ColorRampType = function() {};
+
+/*배열을 확장한 컬렉션으로 아이템을 
+ *다루는 메소드와 이벤트를 제공한다.
+ *vw.Collection 클래스 
+ *@params pItems : array< anything> – 추가할 아이템을 가지고 있는 배열, (O)
+ */
+vw.Collection = function(pItems) {
+  
+  this.collectionProp = new Array();
+
+  this.collectionProp[0] = pItems;
+
+  //컬렉션이 보유한 아이템의 개수
+  this.count = function(){
+    return this.collectionProp.length;
+  }
+};
+
+/*vw.Object 상속*/
+vw.Collection.prototype = new vw.Object(); 
+
+/*주어진 배열의 아이템을 컬렉션의 아이템으로 추가하여 컬렉션을 확장한다.
+ *pItems: array< anything> – 추가할 아이템을 가지고 있는 배열*/
+vw.Collection.prototyp.extend = function(pItems){}
+
+/*컬렉션의 마지막에 주어진 아이템을 추가하고, 
+ *컬렉션의 길이를 반환한다.
+ *@params pItem: anything – 추가할 아이템
+ *@return integer 컬렉션의 길이 
+ */
+vw.Collection.prototyp.add = function(pItem){return index}
+
+/*주어진 인덱스에 아이템을 추가한다. 
+ *index >= count일 경우 마지막에 추가하고 index < 0일 경우
+ *처음에 추가한다.
+ *@param pIndex: integer – 아이템을 추가할 위치
+ *@param pItem: anything – 추가할 아이템
+ */
+vw.Collection.prototyp.insert = function(pIndex, pItem){}
+
+/*주어진 인덱스에 아이템을 설정하여 교체한다. 
+ *무효 인덱스가 입력되면 실행하지 않는다.(index < 0 또는 index >= count)
+ *@param pIndex: integer – 교체할 아이템의 인덱스
+ *@param pItem: anything – 교체할 아이템
+ */
+vw.Collection.prototyp.update = function(pIndex, pItem){}
+
+/*from 인덱스에 있는 item을 to 인덱스 위치로 이동한다. 
+ *그에 따라 from, to 사이의 item index는 변경된다.
+ *@param pFrom: integer – 현재 인덱스
+ *@param pTo: integer – 대상 인덱스
+ */
+vw.Collection.prototyp.move = function(pFrom, pTo){}
+
+/*index1의 item과 index2의 item을 맞바꾼다.
+ *@param pIndex1: integer – 맞바꿀 첫번째 인덱스
+ *@param pIndex2: integer – 맞바꿀 두번째 인덱스
+ */
+vw.Collection.prototyp.switch = function(pIndex1, pIndex2){}
+
+/*아이템 전체를 담은 배열을 반환한다. 
+ *@return array 아이템 전체
+ */
+vw.Collection.prototyp.getArray = function(){}
+
+/*주어진 값으로 인덱스를 반환한다. 없으면 -1을 반환한다. 
+ *값이 동일한 것이 있으면 첫번째 발견된 인덱스를 반환한다.
+ *@param pitem: anything – 찾을 아이템의 값
+ *@return
+ */
+vw.Collection.prototyp.indexOf = function(pitem){}
+vw.Collection.prototyp.item = function(){}
+vw.Collection.prototyp.pop = function(){}
+vw.Collection.prototyp.remove = function(){}
+vw.Collection.prototyp.removeAt = function(){}
+vw.Collection.prototyp.clear = function(){}
+
+
 
 
 
