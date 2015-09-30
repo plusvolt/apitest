@@ -256,7 +256,7 @@ vw.Color.prototype.getNames = function(){
 };
 
 /*컬러 객체 복제*/
-vw.Object.prototype.clone = function(){
+vw.Color.prototype.clone = function(){
   if (null == this || "object" != typeof this) return this;
     var copy = new vw.Color(this.r,this.g,this.b,this.a);
     for (var attr in this) {
@@ -272,16 +272,14 @@ vw.ColorRampType = function() {};
  *vw.Collection 클래스 
  *@params pItems : array< anything> – 추가할 아이템을 가지고 있는 배열, (O)
  */
-vw.Collection = function(pItems) {
-  
+vw.Collection = function(pItems) {  
   this.collectionProp = new Array();
-
-  this.collectionProp[0] = pItems;
-
-  //컬렉션이 보유한 아이템의 개수
-  this.count = function(){
-    return this.collectionProp.length;
+  if(pItems != null && pItems != "undifined"){
+    for(var i = 0; i < pItems.length; i ++){
+      this.collectionProp[i] = pItems[i];  
+    }  
   }
+  this.count = this.collectionProp.length;  
 };
 
 /*vw.Object 상속*/
@@ -289,14 +287,24 @@ vw.Collection.prototype = new vw.Object();
 
 /*주어진 배열의 아이템을 컬렉션의 아이템으로 추가하여 컬렉션을 확장한다.
  *pItems: array< anything> – 추가할 아이템을 가지고 있는 배열*/
-vw.Collection.prototyp.extend = function(pItems){}
+vw.Collection.prototype.extend = function(pItems){
+  var curIdx = this.count;
+  for(var i = 0; i < pItems.length; i ++){
+    this.collectionProp[curIdx+i] = pItems[i];  
+  }
+  this.updateCount();
+}
 
 /*컬렉션의 마지막에 주어진 아이템을 추가하고, 
  *컬렉션의 길이를 반환한다.
  *@params pItem: anything – 추가할 아이템
  *@return integer 컬렉션의 길이 
  */
-vw.Collection.prototyp.add = function(pItem){return index}
+vw.Collection.prototype.add = function(pItem){
+  var returnValue = this.collectionProp.push(pItem);
+  this.updateCount();
+  return returnValue
+}
 
 /*주어진 인덱스에 아이템을 추가한다. 
  *index >= count일 경우 마지막에 추가하고 index < 0일 경우
@@ -304,47 +312,183 @@ vw.Collection.prototyp.add = function(pItem){return index}
  *@param pIndex: integer – 아이템을 추가할 위치
  *@param pItem: anything – 추가할 아이템
  */
-vw.Collection.prototyp.insert = function(pIndex, pItem){}
+vw.Collection.prototype.insert = function(pIndex, pItem){
+  if(pIndex < 0){
+    this.collectionProp.unshift(pItem);    
+  }else if(pIndex >= this.count){
+    this.collectionProp.push(pItem);    
+  }else{
+    this.collectionProp.splice(pIndex,0, pItem);
+  }  
+  this.updateCount();
+}
 
 /*주어진 인덱스에 아이템을 설정하여 교체한다. 
  *무효 인덱스가 입력되면 실행하지 않는다.(index < 0 또는 index >= count)
  *@param pIndex: integer – 교체할 아이템의 인덱스
  *@param pItem: anything – 교체할 아이템
  */
-vw.Collection.prototyp.update = function(pIndex, pItem){}
+vw.Collection.prototype.update = function(pIndex, pItem){
+  if(pIndex > 0 || pIndex < this.count){
+    this.collectionProp[pIndex] = pItem;        
+  }
+}
 
 /*from 인덱스에 있는 item을 to 인덱스 위치로 이동한다. 
  *그에 따라 from, to 사이의 item index는 변경된다.
  *@param pFrom: integer – 현재 인덱스
  *@param pTo: integer – 대상 인덱스
  */
-vw.Collection.prototyp.move = function(pFrom, pTo){}
+vw.Collection.prototype.move = function(pFrom, pTo){
+  if(pFrom < 0 || pFrom >= this.count){
+    return false;
+  }else if(pTo < 0 || pTo >= this.count){
+    return false;
+  }else{
+    this.collectionProp[pTo] = vw.Util.unSafeClone(this.collectionProp[pFrom]);
+    this.removeAt(pFrom);        
+  }
+}
 
 /*index1의 item과 index2의 item을 맞바꾼다.
  *@param pIndex1: integer – 맞바꿀 첫번째 인덱스
  *@param pIndex2: integer – 맞바꿀 두번째 인덱스
  */
-vw.Collection.prototyp.switch = function(pIndex1, pIndex2){}
+vw.Collection.prototype.switch = function(pIndex1, pIndex2){
+  if(pIndex1 < 0 || pIndex1 >= this.count){
+    return false;
+  }else if(pIndex2 < 0 || pIndex2 >= this.count){
+    return false;
+  }else{
+    var temp1 = vw.Util.unSafeClone(this.collectionProp[pIndex1]);
+    this.update(pIndex1, vw.Util.unSafeClone(this.collectionProp[pIndex2]));
+    this.update(pIndex2, temp1);
+  }
+}
 
 /*아이템 전체를 담은 배열을 반환한다. 
  *@return array 아이템 전체
  */
-vw.Collection.prototyp.getArray = function(){}
+vw.Collection.prototype.getArray = function(){
+  return this.collectionProp;
+}
 
 /*주어진 값으로 인덱스를 반환한다. 없으면 -1을 반환한다. 
  *값이 동일한 것이 있으면 첫번째 발견된 인덱스를 반환한다.
- *@param pitem: anything – 찾을 아이템의 값
- *@return
+ *@param pItem: anything – 찾을 아이템의 값
+ *@return integer : 인덱스
  */
-vw.Collection.prototyp.indexOf = function(pitem){}
-vw.Collection.prototyp.item = function(){}
-vw.Collection.prototyp.pop = function(){}
-vw.Collection.prototyp.remove = function(){}
-vw.Collection.prototyp.removeAt = function(){}
-vw.Collection.prototyp.clear = function(){}
+vw.Collection.prototype.indexOf = function(pItem){
+  var retrunValue = -1
+  for(var i = 0; i < this.count; i++){
+    if(this.collectionProp[i] == pItem){
+      return i;
+    }
+  }
+}
 
+/*주어진 인덱스의 아이템을 반환한다. 
+ *무효 인덱스가 입력되면 NULL을 반환한다.
+ *@param pIndex: integer – 아이템의 인덱스
+ *@return anything 인덱스의 아이템
+ */
+vw.Collection.prototype.item = function(pIndex){
+  if(pIndex < 0 || pIndex >= this.count){
+    return null;
+  }else{
+    return this.collectionProp[pIndex];
+  }
+}
 
+/*컬렉션의 마지막 아이템을 제거하여 반환한다. 
+ *컬렉션이 비어 있으면 NULL을 반환한다.
+ *@return anything 마지막 아이템값 
+ */
+vw.Collection.prototype.pop = function(){
+  var returnValue = null;
+  if(this.count > 0){
+    returnValue = this.collectionProp.pop();
+    this.updateCount();
+  }
+  return returnValue;
+}
 
+/*컬렉션에서 주어진 아이템이 첫번째로 나타나는 경우를 제거하고, 
+ *제거한 아이템을 반환한다. 
+ *아이템을 찾지 못한 경우에는 NULL을 반환한다.
+ *@param pItem: anything – 제거할 아이템
+ */
+vw.Collection.prototype.remove = function(pItem){
+  var returnValue = null;
+  for(var i = 0; i < this.count; i++){
+    if(this.collectionProp[i] == pItem){
+      returnValue = this.removeItem(i);
+      break;
+    }
+  }
+  this.updateCount();
+  return returnValue;
+}
+
+/*주어진 인덱스의 아이템을 제거하고 반환한다. 
+ *컬렉션에서 인덱스에 아이템이 없는 경우에는 NULL을 반환한다.
+ *@param pIndex: integer – 제거할 아이템의 인덱스
+ */
+vw.Collection.prototype.removeAt = function(pIndex){
+  var returnValue = null;
+  if(pIndex < 0 || pIndex >= this.count){
+    return returnValue;
+  }else{
+    returnValue = this.removeItem(pIndex);
+  }
+  this.updateCount();
+  return returnValue;
+}
+
+/*인덱스를 입력 받아 아이템을 제거 하고 반환
+ *remove메소드와 removeAt메소드에서 사용
+ *@param pIndex : 삭제할 아이템의 인덱스
+ *@return anything : 삭제된 아이템 값
+ */
+vw.Collection.prototype.removeItem = function(pIndex){
+  var returnValue = this.collectionProp.splice(pIndex,1);
+  this.updateCount();
+  return returnValue;
+}
+
+/*컬렉션의 모든 아이템을 제거한다.*/
+vw.Collection.prototype.clear = function(){
+  this.collectionProp = new Array();  
+  this.updateCount();
+}
+
+/*컬렉션 수정시  count 프로퍼티 갱신*/
+vw.Collection.prototype.updateCount = function(){
+  this.count = this.collectionProp.length;  
+}
+
+/*컬렉션의 객체 복제*/
+vw.Collection.prototype.clone = function(){
+  if (null == this || "object" != typeof this) return this;
+    var copy = new vw.Collection();
+    for (var key in this) {
+      copy[key] = vw.Util.unSafeClone(this[key]);
+    }
+    return copy;    
+}
+
+/*이름으로 아이템을 다루는 메소드와 이벤트를 제공한다 */
+vw.NamedSet = function() {
+  this.count = this.getNames().length;
+};
+
+/*vw.Object 상속*/
+vw.NamedSet.prototype = new vw.Object(); 
+
+/*모든 아이템을 제거한다*/
+vw.NamedSet.prototype.clear = function() {
+  this = new vw.NamedSet();
+};
 
 
 
@@ -513,7 +657,7 @@ vw.Color.names = {
 /*공통 유틸 관련 클래스*/
 vw.Util = {};
 vw.Util.unSafeClone = function(obj){
-   var type = vw.typeOf(obj);
+   var type = vw.Util.typeOf(obj);
   if (type == 'object' || type == 'array') {
   
     var clone = type == 'array' ? [] : {};
@@ -529,16 +673,13 @@ vw.Util.unSafeClone = function(obj){
 }
 
 
-
-
-
 /**
  * This is a "fixed" version of the typeof operator.  It differs from the typeof
  * operator in such a way that null returns 'null' and arrays return 'array'.
  * @param {*} value The value to get the type of.
  * @return {string} The name of the type.
  */
-vw.typeOf = function(value) {
+vw.Util.typeOf = function(value) {
   var s = typeof value;
   if (s == 'object') {
     if (value) {
