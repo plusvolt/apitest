@@ -3,7 +3,9 @@
   * 3D WEB API 2.0
   */
  
-var vw = {};
+var vw = {
+  VERSION : "DEV 2.0.0001"
+};
 
 
 /*******************************************************************************
@@ -234,7 +236,7 @@ vw.Bound ={
  */
 vw.Color = function(pr,pg,pb,pa){
   if(arguments.length < 3) return false; //생서자 호출시 최소 파라미터 3개
-  
+  console.log(arguments.length);
   for(var i = 0; i < arguments.length; i ++ ){ //RGB범위값 체크
     if(arguments[i] < 0 && arguments[i] > 255){
       return false;
@@ -252,12 +254,18 @@ vw.Color = function(pr,pg,pb,pa){
     this.a = pa;  
   }else{
     this.a = 1;
-  }  
+  }
+
 }
 
 vw.Color.prototype = new vw.Object(); //vw.Object 상속
-//rgba to color
-vw.Color.prototype.fromRation = function(pr,pg,pb,pa){
+/*(0~1) 범위의 값으로부터 Color를 생성한다.
+ *r: float – 빨간색 요소 (0~1)
+ *g: float – 녹색 요소 (0~1)
+ *b: float – 파란색 요소 (0~1)
+ *a: float –투명도 요소 (0~1), (O)
+*/
+vw.Color.fromRation = function(pr,pg,pb,pa){
   //구현
   return true;
 }
@@ -266,7 +274,7 @@ vw.Color.prototype.fromRation = function(pr,pg,pb,pa){
  *@param color: string – CSS 색상 문자열 (“#FFFFFFFF”)
  *@return (vw.Color) 컬러
  */
-vw.Color.prototype.fromCssString = function(pColor){
+vw.Color.fromCssString = function(pColor){
   
   var r = parseInt((cutHex(pColor)).substring(0,2),16);
   var g = parseInt((cutHex(pColor)).substring(2,4),16);
@@ -298,9 +306,9 @@ vw.Color.prototype.getCssString = function(){
   if(hexValB.substr(0,1) ==0){
     hexValB = hexValB+'0';
   }   
-  var hexVal = hexValR+hexValG+hexValB;  
+  var hexVal = "#"+hexValR+hexValG+hexValB;  
   hexVal= hexVal.toUpperCase();
-  
+
   return hexVal;
 }
 /*사용자 프로퍼티 키 목록 반환*/
@@ -329,6 +337,40 @@ vw.Color.prototype.clone = function(){
     }
   return copy;       
 }
+
+vw.Color.BLACK= new vw.Color(0,0,0);
+vw.Color.WHITE= new vw.Color(255,255,255);
+vw.Color.GRAY= new vw.Color(128,128,128);
+vw.Color.RED= new vw.Color(255,0,0);
+vw.Color.GREEN= new vw.Color(0,128,0);
+vw.Color.BLUE=  vw.Color(0,0,255);
+vw.Color.BROWN= new vw.Color(165,42,42);
+vw.Color.GOLD= new vw.Color(255,215,0);
+vw.Color.GREENYELLOW= new vw.Color(173,255,47);
+vw.Color.PINK= new vw.Color(255,192,203);
+vw.Color.PURPLE= new vw.Color(128,0,128);
+vw.Color.YELLOW= new vw.Color(255,255,0);
+vw.Color.AQUA= new vw.Color(0,255,255);
+vw.Color.BLUEVIOLET= new vw.Color(138,43,226);
+vw.Color.CHOCOLATE= new vw.Color(210,105,30);
+vw.Color.CORAL= new vw.Color(255,127,80);
+vw.Color.CYAN= new vw.Color(0,255,255);
+vw.Color.HOTPINK= new vw.Color(255,105,180);
+vw.Color.INDIGO= new vw.Color(75,0,130);
+vw.Color.KHAKI= new vw.Color(240,230,140);
+vw.Color.LAVENDER= new vw.Color(230,230,250);
+vw.Color.LIME= new vw.Color(0,255,0);
+vw.Color.MAGENTA= new vw.Color(255,0,255);
+vw.Color.NAVY= new vw.Color(0,0,128);
+vw.Color.OLIVE= new vw.Color(128, 128, 0);
+vw.Color.ORANGE= new vw.Color(255,165,0);
+vw.Color.SALMON= new vw.Color(250,128,114);
+vw.Color.SILVER= new vw.Color(192,192,192);
+vw.Color.SKYBLUE= new vw.Color(135,206,235);
+vw.Color.SNOW= new vw.Color(255,250,250);
+vw.Color.TOMATO= new vw.Color(255,99,71);
+vw.Color.VIOLET= new vw.Color(238,130,238);
+
 
 vw.ColorRampType = function() {};
 
