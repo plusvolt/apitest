@@ -5,6 +5,12 @@
  
 var vw = {};
 
+
+/*******************************************************************************
+ ** 기본 클래스 시작(2015.09.23)
+ ** author plusvolt
+ ********************************************************************************/
+
 /*브이월드 API에서 사용되는 대부분 클래스의 부모 클래스. 
 *추상 클래스로 직접 인스턴스를 생성하지 않는다. 
 *모든 객체에서 이벤트 리스너를 등록하고, 
@@ -34,7 +40,9 @@ vw.Object.prototype.unByKey = function(key){
 	// 반환된 키로 이벤트 제거(구현)
 };
 
-/*사용자 프로퍼티 추가*/
+/*사용자 프로퍼티 추가
+ *@params pName : 프로퍼티 이름, pValue : 프로퍼티 값
+ */
 vw.Object.prototype.set = function(pName, pValue){
     if(this.userProperties == null){
         this.userProperties = {};
@@ -44,12 +52,17 @@ vw.Object.prototype.set = function(pName, pValue){
     }	
 };
 
-/*사용자 프로퍼티값을 키로 반환*/
+/*사용자 프로퍼티값을 키로 반환
+ *@params pName : 프로퍼티 이름
+ *@return (navtiveObject) 프로퍼티 값
+ */
 vw.Object.prototype.get = function(name){
     return this.userProperties[name];
 };
 
-/*사용자 프로퍼티 키 목록 반환*/
+/*사용자 프로퍼티 키 목록 반환
+ *@return (Array) 프로퍼티 이릅 배열
+ */
 vw.Object.prototype.getNames = function(){
     if(this.userProperties){
         return Object.keys(this.userProperties);    
@@ -58,13 +71,32 @@ vw.Object.prototype.getNames = function(){
     }
 };
 
-/*사용자 프로퍼티 제거*/
+/*사용자 프로퍼티 값 목록 반환
+ *@return (Array) 프로퍼티 값 배열
+ */
+vw.Object.prototype.getValues = function(){
+    var valueArr = new Array();
+    if(this.userProperties){
+      for(var i=0; i < Object.keys(this.userProperties).length; i++){
+        valueArr[i] = this.userProperties[Object.keys(this.userProperties)[i]];
+      }
+      return valueArr;
+    }else{
+        return null;   
+    }
+};
+
+
+/*사용자 프로퍼티 제거
+ *@return (Array) 프로퍼티 이릅 배열
+ */
 vw.Object.prototype.remove = function(name){
 	this.name = null;
 };
 
 /*
  *객체 복제
+ *@return (vw.Object) 복사된 객체
  */
 vw.Object.prototype.clone = function(){
     
@@ -137,6 +169,7 @@ vw.CoordPixel = {
 
 /*
  *크기(폭과 높이)를 표현하는 클래스 vw.Size
+ *@params pWidth : 넓이, pHeight : 높이
  */
 vw.Size = function(pWidth, pHeight){
     this.width = pWidth;
@@ -228,15 +261,47 @@ vw.Color.prototype.fromRation = function(pr,pg,pb,pa){
   //구현
   return true;
 }
-//hex to color
+
+/*CSS 컬러 스트링에서 Color를 생성한다.
+ *@param color: string – CSS 색상 문자열 (“#FFFFFFFF”)
+ *@return (vw.Color) 컬러
+ */
 vw.Color.prototype.fromCssString = function(pColor){
-  //구현
-  return true;
+  
+  var r = parseInt((cutHex(pColor)).substring(0,2),16);
+  var g = parseInt((cutHex(pColor)).substring(2,4),16);
+  var b = parseInt((cutHex(pColor)).substring(4,6),16);
+
+
+  return new vw.Color(r,g,b);
 }
-  //color to hex;
-vw.Color.prototype.getCssString = function(pColor){
-  //구현
-  return true;
+
+/*Color를 CSS 컬러 스트링으로 반환
+ *@return (nativeObject) css 컬러 스트링
+ */
+vw.Color.prototype.getCssString = function(){
+  
+  var rVal= parseInt(this.r);
+  var gVal= parseInt(this.g);
+  var bVal= parseInt(this.b);
+  
+  var hexValR = rVal.toString(16);  
+  var hexValG = gVal.toString(16);  
+  var hexValB = bVal.toString(16);
+  
+  if(hexValR.substr(0,1) == 0 ){ 
+    hexValR = hexValR+'0';
+  } 
+  if(hexValG.substr(0,1) ==0){
+    hexValG = hexValG+'0';
+  } 
+  if(hexValB.substr(0,1) ==0){
+    hexValB = hexValB+'0';
+  }   
+  var hexVal = hexValR+hexValG+hexValB;  
+  hexVal= hexVal.toUpperCase();
+  
+  return hexVal;
 }
 /*사용자 프로퍼티 키 목록 반환*/
 vw.Color.prototype.getNames = function(){
@@ -479,18 +544,84 @@ vw.Collection.prototype.clone = function(){
 
 /*이름으로 아이템을 다루는 메소드와 이벤트를 제공한다 */
 vw.NamedSet = function() {
-  this.count = this.getNames().length;
+  this.count = 0;
 };
 
 /*vw.Object 상속*/
 vw.NamedSet.prototype = new vw.Object(); 
 
+/*  셋 추가 */
+vw.NamedSet.prototype.set = function(pName, pValue){
+    if(this.userProperties == null){
+        this.userProperties = {};
+        this.userProperties[pName] = pValue;
+    }else{
+        this.userProperties[pName] = pValue;    
+    } 
+    this.updataCount();
+};
+
+/* 셋 반환 */
+vw.NamedSet.prototype.get = function(pName){
+  return this.userProperties[pName];
+};
+
+/* 셋 반환 */
+vw.NamedSet.prototype.updataCount = function(pName){
+  this.count = this.getNames().length;
+}
+
 /*모든 아이템을 제거한다*/
 vw.NamedSet.prototype.clear = function() {
-  this = new vw.NamedSet();
+  this.userProperties = {};
+  this.updataCount();
+};
+
+/*
+ *객체 복제
+ *@return NamedSet 복사된 객체
+ */
+vw.NamedSet.prototype.clone = function(){
+    if (null == this || "object" != typeof this) return this;
+    var copy = new vw.NamedSet();
+    for (var key in this) {
+      copy[key] = vw.Util.unSafeClone(this[key]);
+    }
+    return copy;
 };
 
 
+/*컨트롤의 위치를 지정하는 상수.
+ *임시로 정의
+ */
+vw.SiteAlignType = {
+  "NONE" : 0,
+  "TOP_LEFT" : 1,
+  "TOP_CENTER" : 2,
+  "TOP_RIGHT" : 3,
+  "CENTER_LEFT" : 4,
+  "CENTER_CENTER" : 5,
+  "CENTER_RIGHT" : 6,
+  "BOTTOM_LEFT" : 7,
+  "BOTTOM_CENTER" : 8,
+  "BOTTOM_RIGHT" : 9
+}
+
+/*변경상태 
+ *임시로 정의
+ */
+vw.SiteAlignType = {
+  "NONE" : 0,
+  "INSERT" : 1,
+  "UPDATE" : 2,
+  "DELETE" : 3  
+}
+
+/*******************************************************************************
+ ** 이벤트 관련 클래스 시작(2015.09.30)
+ ** author plusvolt
+ ********************************************************************************/
+vw.EventHandler = function(){}
 
 /*
 vw.Color.names = {
