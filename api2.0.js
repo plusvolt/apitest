@@ -236,7 +236,7 @@ vw.Bound ={
  */
 vw.Color = function(pr,pg,pb,pa){
   if(arguments.length < 3) return false; //생서자 호출시 최소 파라미터 3개
-  console.log(arguments.length);
+  
   for(var i = 0; i < arguments.length; i ++ ){ //RGB범위값 체크
     if(arguments[i] < 0 && arguments[i] > 255){
       return false;
@@ -259,6 +259,7 @@ vw.Color = function(pr,pg,pb,pa){
 }
 
 vw.Color.prototype = new vw.Object(); //vw.Object 상속
+
 /*(0~1) 범위의 값으로부터 Color를 생성한다.
  *r: float – 빨간색 요소 (0~1)
  *g: float – 녹색 요소 (0~1)
@@ -266,8 +267,22 @@ vw.Color.prototype = new vw.Object(); //vw.Object 상속
  *a: float –투명도 요소 (0~1), (O)
 */
 vw.Color.fromRation = function(pr,pg,pb,pa){
-  //구현
-  return true;
+  if(arguments.length < 3) return false; 
+  if(pr < 0 && pr > 1) return false;
+  if(pg < 0 && pg > 1) return false;
+  if(pb < 0 && pb > 1) return false;   
+  if(pa < 0 && pa > 1) return false;
+  
+  var returnArr = new Array();
+
+  for(var i = 0; i < arguments.length; i ++ ){ //RGB범위값 체크
+   returnArr[i] = vw.Util.ratioToRGB(arguments[i]);
+  }
+
+  if(returnArr[3] == null || returnArr[i] == "undefined"){
+    returnArr[3] = 1;
+  }
+  return new vw.Color(returnArr[0],returnArr[1],returnArr[2],returnArr[3]);
 }
 
 /*CSS 컬러 스트링에서 Color를 생성한다.
@@ -663,8 +678,253 @@ vw.SiteAlignType = {
  ** 이벤트 관련 클래스 시작(2015.09.30)
  ** author plusvolt
  ********************************************************************************/
-vw.EventHandler = function(){}
+vw.Event = function(){}
 
+/*값이 변경될 경우에 발생하는 이벤트의 핸들러
+@param (vw.Object)sender 이벤트가 발생한 객체
+@param (nativeObject)old 변경 전의 값
+@param (nativeObject)new 변경 후 값*/
+vw.ChangeEvent = function(sender, old, new){
+
+}
+
+/*값이 변경될 경우에 발생하는 이벤트의 핸들러
+@param (vw.Object)sender 이벤트가 발생한 객체
+@param (String)name 값이 변경된 개발자 지정 프로퍼티의 이름
+@param (nativeObject)old 변경 전의 값
+@param (nativeObject)new 변경 후 값*/
+vw.PropertyChangeEvent = function(sender, name, old, new){
+
+}
+
+/*값이 변경될 경우에 발생하는 이벤트의 핸들러
+@param (vw.Collection)sender 이벤트가 발생한 객체
+@param (vw.EditType)why 이벤트 발생 이유
+@param (integer)index 변견이 발생한 이벤트의 인덱스
+@param (nativeObject)old delete 또는 update 대상 아이템
+@param (nativeObject)new insert 또는 update 아이템
+*/
+vw.CollectionEvent = function(sender, why, index, old, new){
+
+}
+
+/*값이 변경될 경우에 발생하는 이벤트의 핸들러
+@param (vw.Map)sender 이벤트가 발생한 맵 객체
+@param (vw.Pixel)pixel 이벤트가 발생한 지점의 화면 좌표
+@param (integer)wheel 휠 스크롤의 정도
+@param (boolean)ctrlKey ctrl 키가 눌러져있으면 true, 아니면 false
+@param (boolean)shiftKey shift 키가 눌러져있으면 true, 아니면 false
+@param (boolean)altKey alt 키가 눌러져있으면 true, 아니면 false
+@param (boolean)handled 이벤트가 처리되었는지를 설정한다. 
+                true를 설정하면 이벤트가 더이상 전파되지 않는다. 
+*/
+vw.MapEvent = function(sender, pixel, wheel, ctrlKey, shiftKey, altKey, handled){
+
+}
+
+/*값이 변경될 경우에 발생하는 이벤트의 핸들러
+@param (vw.Map)sender 이벤트가 발생한 맵 객체
+@param (integer)keyCode 키 코드
+@param (boolean)ctrlKey ctrl 키가 눌러져있으면 true, 아니면 false
+@param (boolean)shiftKey shift 키가 눌러져있으면 true, 아니면 false
+@param (boolean)altKey alt 키가 눌러져있으면 true, 아니면 false
+@param (boolean)handled 이벤트가 처리되었는지를 설정한다. 
+                true를 설정하면 이벤트가 더이상 전파되지 않는다. 
+*/
+vw.KeyEvent = function(sender, keyCode, ctrlKey, shiftKey, altKey, handled){
+
+}
+
+
+/*3d 전용 Map 클래스 */
+vw.v3d = {};
+
+/*맵 클래스. 레이어, 컨트롤, 인터액션 등을 포함하고 관리한다. 
+*가장 기본적인 클래스로 오픈 API 진입점 역할을 하는 핵심 클래스이다.
+*@param container 맵 클래스가 위치한 컨테이너
+*@param (vw.MapOptions)opt 맵 클래스 생성 옵션
+*/
+vw.v3d.Map = function(container, opt){
+    /*맵 클래스가 위치한 컨테이너.
+  *@type navtiveObject
+  */
+  vw.v3d.Map.container = {};
+
+  /*레이어 컬렉션.
+  *@type vw.Layers
+  */
+  vw.v3d.Map.layers = {};
+
+  /*Popup(구 InfoWindow)과 같은 overlay를 관리
+  *@type vw.overlays
+  */
+  vw.v3d.Map.overlays = {};
+
+  /*컨트롤 컬렉션.
+  *@type vw.Controls
+  */
+  vw.v3d.Map.controls = {};
+
+  /*인터액션 컬렉션.
+  *@type vw.Interaction
+  */
+  vw.v3d.Map.interactions = {};
+
+  /*맵을 조절하는 카메라
+  *@type vw.Camera
+  */
+  vw.v3d.Map.camera = {};
+
+  /*글로브 객체
+  *@type vw.Globe
+  */
+  vw.v3d.Map.globe = {};
+
+  /*브이월드의 좌표 참조 체계
+  *@type vw.Crs
+  */
+  vw.v3d.Map.crs = {};
+
+  /*(D)false, 풀스크린 상태를 설정하고 반환한다
+  *@type boolean
+  */
+  vw.v3d.Map.isFullScreen = {};
+
+};
+
+vw.v3d.Map.prototype.pxcelToCoord = function(){};
+
+
+
+
+
+/*공통 유틸 관련 클래스*/
+vw.Util = {};
+
+
+/*객체 복사하는 메소드
+복사하려는 객체가 기본 객체가 아닐때 사용*/
+vw.Util.unSafeClone = function(obj){
+   var type = vw.Util.typeOf(obj);
+  if (type == 'object' || type == 'array') {
+  
+    var clone = type == 'array' ? [] : {};
+  
+    for (var key in obj) {
+      clone[key] = vw.Util.unSafeClone(obj[key]);
+    }
+  
+    return clone;
+  }
+
+  return obj;
+}
+
+
+vw.Util.ratioToRGB = function(ratio){
+  var returnValue = new Number(ratio);
+  returnValue = returnValue * 255;
+  return Math.round(returnValue);
+}
+
+
+/**
+ * This is a "fixed" version of the typeof operator.  It differs from the typeof
+ * operator in such a way that null returns 'null' and arrays return 'array'.
+ * @param {*} value The value to get the type of.
+ * @return {string} The name of the type.
+ */
+vw.Util.typeOf = function(value) {
+  var s = typeof value;
+  if (s == 'object') {
+    if (value) {
+      // Check these first, so we can avoid calling Object.prototype.toString if
+      // possible.
+      //
+      // IE improperly marshals tyepof across execution contexts, but a
+      // cross-context object will still return false for "instanceof Object".
+      if (value instanceof Array) {
+        return 'array';
+      } else if (value instanceof Object) {
+        return s;
+      }
+
+      // HACK: In order to use an Object prototype method on the arbitrary
+      //   value, the compiler requires the value be cast to type Object,
+      //   even though the ECMA spec explicitly allows it.
+      var className = Object.prototype.toString.call(
+          /** @type {Object} */ (value));
+      // In Firefox 3.6, attempting to access iframe window objects' length
+      // property throws an NS_ERROR_FAILURE, so we need to special-case it
+      // here.
+      if (className == '[object Window]') {
+        return 'object';
+      }
+
+      // We cannot always use constructor == Array or instanceof Array because
+      // different frames have different Array objects. In IE6, if the iframe
+      // where the array was created is destroyed, the array loses its
+      // prototype. Then dereferencing val.splice here throws an exception, so
+      // we can't use goog.isFunction. Calling typeof directly returns 'unknown'
+      // so that will work. In this case, this function will return false and
+      // most array functions will still work because the array is still
+      // array-like (supports length and []) even though it has lost its
+      // prototype.
+      // Mark Miller noticed that Object.prototype.toString
+      // allows access to the unforgeable [[Class]] property.
+      //  15.2.4.2 Object.prototype.toString ( )
+      //  When the toString method is called, the following steps are taken:
+      //      1. Get the [[Class]] property of this object.
+      //      2. Compute a string value by concatenating the three strings
+      //         "[object ", Result(1), and "]".
+      //      3. Return Result(2).
+      // and this behavior survives the destruction of the execution context.
+      if ((className == '[object Array]' ||
+           // In IE all non value types are wrapped as objects across window
+           // boundaries (not iframe though) so we have to do object detection
+           // for this edge case.
+           typeof value.length == 'number' &&
+           typeof value.splice != 'undefined' &&
+           typeof value.propertyIsEnumerable != 'undefined' &&
+           !value.propertyIsEnumerable('splice')
+
+          )) {
+        return 'array';
+      }
+      // HACK: There is still an array case that fails.
+      //     function ArrayImpostor() {}
+      //     ArrayImpostor.prototype = [];
+      //     var impostor = new ArrayImpostor;
+      // this can be fixed by getting rid of the fast path
+      // (value instanceof Array) and solely relying on
+      // (value && Object.prototype.toString.vall(value) === '[object Array]')
+      // but that would require many more function calls and is not warranted
+      // unless closure code is receiving objects from untrusted sources.
+
+      // IE in cross-window calls does not correctly marshal the function type
+      // (it appears just as an object) so we cannot use just typeof val ==
+      // 'function'. However, if the object has a call property, it is a
+      // function.
+      if ((className == '[object Function]' ||
+          typeof value.call != 'undefined' &&
+          typeof value.propertyIsEnumerable != 'undefined' &&
+          !value.propertyIsEnumerable('call'))) {
+        return 'function';
+      }
+
+    } else {
+      return 'null';
+    }
+
+  } else if (s == 'function' && typeof value.call == 'undefined') {
+    // In Safari typeof nodeList returns 'function', and on Firefox typeof
+    // behaves similarly for HTML{Applet,Embed,Object}, Elements and RegExps. We
+    // would like to return object for those and we can detect an invalid
+    // function by making sure that the function object has a call method.
+    return 'object';
+  }
+  return s;
+};
 /*
 vw.Color.names = {
   'aliceblue': '#f0f8ff',
@@ -827,122 +1087,6 @@ vw.Color.names = {
 
 
 
-/*공통 유틸 관련 클래스*/
-vw.Util = {};
-vw.Util.unSafeClone = function(obj){
-   var type = vw.Util.typeOf(obj);
-  if (type == 'object' || type == 'array') {
-  
-    var clone = type == 'array' ? [] : {};
-  
-    for (var key in obj) {
-      clone[key] = vw.Util.unSafeClone(obj[key]);
-    }
-  
-    return clone;
-  }
-
-  return obj;
-}
-
-
-/**
- * This is a "fixed" version of the typeof operator.  It differs from the typeof
- * operator in such a way that null returns 'null' and arrays return 'array'.
- * @param {*} value The value to get the type of.
- * @return {string} The name of the type.
- */
-vw.Util.typeOf = function(value) {
-  var s = typeof value;
-  if (s == 'object') {
-    if (value) {
-      // Check these first, so we can avoid calling Object.prototype.toString if
-      // possible.
-      //
-      // IE improperly marshals tyepof across execution contexts, but a
-      // cross-context object will still return false for "instanceof Object".
-      if (value instanceof Array) {
-        return 'array';
-      } else if (value instanceof Object) {
-        return s;
-      }
-
-      // HACK: In order to use an Object prototype method on the arbitrary
-      //   value, the compiler requires the value be cast to type Object,
-      //   even though the ECMA spec explicitly allows it.
-      var className = Object.prototype.toString.call(
-          /** @type {Object} */ (value));
-      // In Firefox 3.6, attempting to access iframe window objects' length
-      // property throws an NS_ERROR_FAILURE, so we need to special-case it
-      // here.
-      if (className == '[object Window]') {
-        return 'object';
-      }
-
-      // We cannot always use constructor == Array or instanceof Array because
-      // different frames have different Array objects. In IE6, if the iframe
-      // where the array was created is destroyed, the array loses its
-      // prototype. Then dereferencing val.splice here throws an exception, so
-      // we can't use goog.isFunction. Calling typeof directly returns 'unknown'
-      // so that will work. In this case, this function will return false and
-      // most array functions will still work because the array is still
-      // array-like (supports length and []) even though it has lost its
-      // prototype.
-      // Mark Miller noticed that Object.prototype.toString
-      // allows access to the unforgeable [[Class]] property.
-      //  15.2.4.2 Object.prototype.toString ( )
-      //  When the toString method is called, the following steps are taken:
-      //      1. Get the [[Class]] property of this object.
-      //      2. Compute a string value by concatenating the three strings
-      //         "[object ", Result(1), and "]".
-      //      3. Return Result(2).
-      // and this behavior survives the destruction of the execution context.
-      if ((className == '[object Array]' ||
-           // In IE all non value types are wrapped as objects across window
-           // boundaries (not iframe though) so we have to do object detection
-           // for this edge case.
-           typeof value.length == 'number' &&
-           typeof value.splice != 'undefined' &&
-           typeof value.propertyIsEnumerable != 'undefined' &&
-           !value.propertyIsEnumerable('splice')
-
-          )) {
-        return 'array';
-      }
-      // HACK: There is still an array case that fails.
-      //     function ArrayImpostor() {}
-      //     ArrayImpostor.prototype = [];
-      //     var impostor = new ArrayImpostor;
-      // this can be fixed by getting rid of the fast path
-      // (value instanceof Array) and solely relying on
-      // (value && Object.prototype.toString.vall(value) === '[object Array]')
-      // but that would require many more function calls and is not warranted
-      // unless closure code is receiving objects from untrusted sources.
-
-      // IE in cross-window calls does not correctly marshal the function type
-      // (it appears just as an object) so we cannot use just typeof val ==
-      // 'function'. However, if the object has a call property, it is a
-      // function.
-      if ((className == '[object Function]' ||
-          typeof value.call != 'undefined' &&
-          typeof value.propertyIsEnumerable != 'undefined' &&
-          !value.propertyIsEnumerable('call'))) {
-        return 'function';
-      }
-
-    } else {
-      return 'null';
-    }
-
-  } else if (s == 'function' && typeof value.call == 'undefined') {
-    // In Safari typeof nodeList returns 'function', and on Firefox typeof
-    // behaves similarly for HTML{Applet,Embed,Object}, Elements and RegExps. We
-    // would like to return object for those and we can detect an invalid
-    // function by making sure that the function object has a call method.
-    return 'object';
-  }
-  return s;
-};
 
 
 
