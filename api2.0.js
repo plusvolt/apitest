@@ -736,6 +736,10 @@ vw.KeyEvent = function(sender, keyCode, ctrlKey, shiftKey, altKey, handled){
 }
 
 
+/*******************************************************************************
+ ** MAP 관련 클래스 시작(2015.10.05) 
+ ********************************************************************************/
+
 /*3d 전용 Map 클래스 */
 vw.v3d = {};
 
@@ -748,54 +752,272 @@ vw.v3d.Map = function(container, opt){
     /*맵 클래스가 위치한 컨테이너.
   *@type navtiveObject
   */
-  vw.v3d.Map.container = {};
+  this.container = {};
 
   /*레이어 컬렉션.
   *@type vw.Layers
   */
-  vw.v3d.Map.layers = {};
+  this.layers = {};
 
   /*Popup(구 InfoWindow)과 같은 overlay를 관리
   *@type vw.overlays
   */
-  vw.v3d.Map.overlays = {};
+  this.overlays = {};
 
   /*컨트롤 컬렉션.
   *@type vw.Controls
   */
-  vw.v3d.Map.controls = {};
+  this.controls = {};
 
   /*인터액션 컬렉션.
   *@type vw.Interaction
   */
-  vw.v3d.Map.interactions = {};
+  this.interactions = {};
 
   /*맵을 조절하는 카메라
   *@type vw.Camera
   */
-  vw.v3d.Map.camera = {};
+  this.camera = {};
 
   /*글로브 객체
   *@type vw.Globe
   */
-  vw.v3d.Map.globe = {};
+  this.globe = {};
 
   /*브이월드의 좌표 참조 체계
   *@type vw.Crs
   */
-  vw.v3d.Map.crs = {};
+  this.crs = {};
 
   /*(D)false, 풀스크린 상태를 설정하고 반환한다
   *@type boolean
   */
-  vw.v3d.Map.isFullScreen = {};
+  this.isFullScreen = {};
 
 };
 
-vw.v3d.Map.prototype.pxcelToCoord = function(){};
+vw.v3d.Map.prototype = new vw.Object();
+
+/*주어진 화면 좌표에 해당하는 맵의 좌표를 반환한다.
+ *@param point: vw.Pixel – 변환할 화면 좌표
+ *@return vw.Coord 화면 좌표에 해당하는 맵좌표
+ */
+vw.v3d.Map.prototype.pxcelToCoord = function(pPoint){
+  retrun new vw.Coord();
+};
+
+/*주어진 맵의 좌표에 해당하는 화면 좌표를 반환한다.
+ *@param point: vw.Coord – 변환할 맵 좌표
+ *@return vw.Pixel 화면 좌표에 해당하는 맵좌표*/
+vw.v3d.Map.prototype.coordToPixel = function(point){
+  retrun new vw.Pixel();
+}
+
+/*화면좌표의 extent를 맵 좌표의 extent로 변환하여 반환한다.
+extent: vw.Extent – 화면좌표로 구성된 extent*/
+vw.v3d.Map.prototype.screenExtentToMapExtent = function(extent){
+  //2D전용
+  retrun false;
+}
+
+/*맵의 뷰포트의 크기를 다시 계산한다. 
+ *컨테이너의 크기가 변경된 경우에 반드시 호출해야 한다. */
+vw.v3d.Map.prototype.updateSize = function(){}
+
+/*지도에 그려진 측정결과, 마커, 
+ *팝업 그래픽 객체를 모두 삭제한다. 
+ */
+vw.v3d.Map.prototype.clear = function(){}
+
+vw.v3d.Map.EventType={
+  "onTargetChanged" : "onTargetChanged", //맵의 컨테이너가 변경되면 발생하는 이벤트
+  "onSizeChanged" : "onSizeChanged",//맵의 뷰포트 크기가 변경되면 발생하는 이벤트
+  "onClick" : "onClick",//드래그없이, 더블클릭이 아닌 단독 클릭하면 발생하는 이벤트. 터치에서 탭도 onClick을 발생시킨다.
+  "onDoubleClick" : "onDoubleClick",//드래그없이 더블클릭하면 발생하는 이벤트
+  "onRightClck" : "onRightClck",//마우스 오른쪽 버튼을 클릭하면 발생하는 이벤트. 터치에서 longPress도 onRightClick을 발생시킨다.
+  "onRightDoubleClck" : "onRightDoubleClck",//마우스 오른쪽 버튼을 클릭하면 발생하는 이벤트
+  "onMouseWheel" : "onMouseWheel",//마우스 휠이 스크롤할 때 발생하는 이벤트
+  "onMouseMove" : "onMouseMove",//맵 위에 마우스가 이동하면 발생하는 이벤트
+  "onMouseIn" : "onMouseIn",//마우스가 맵 영역으로 들어오면 발생하는 이벤트
+  "onMouseOut" : "onMouseOut",//마우스가 맵 영역을 벗어나면 발생하는 이벤트
+  "onDragStart" : "onDragStart",//맵을 드래그하기 직전에 발생하는 이벤트
+  "onDrag" : "onDrag",//맵을 드래그하면 발생하는 이벤트
+  "onDragEnd" : "onDragEnd",//맵을 드래그한 직후에 발생하는 이벤트
+  "onKeyPress" : "onKeyPress",//키보드의 키값이 입력될 때 발생하는 이벤트
+  "onTouchStart" : "onTouchStart",//터치가 시작할 때 발생하는 이벤트, 모바일전용
+  "onTouchMove" : "onTouchMove",//터치가 이동할 때 발생하는 이벤트, 모바일전용
+  "onTouchEnd" : "onTouchEnd"//터치가 종료될 때 발생하는 이벤트, 모바일전용
+}
+
+
+/*vw.Map 클래스에서 사용하는 옵션
+*/
+vw.v3d.MapOptions = {
+  "basemapType" : "", //(D)GRAPHIC, 초기 배경지도
+  "layers" : "",//맵에 포함된 레이어의 목록
+  "controlsDensity" : "",//(D)BASIC, 초기에 생성할 컨트롤 밀도
+  "interactionsDensity": "",//(D)BASIC, 초기에 생성할 인터액션 밀도
+  "homePosition": "", //홈 카메라 위치
+  "initPosition": "" //초기 카메라 위치
+}
+
+/*vw.Map에서 사용하는 배경지도의 종류를 선언하는 열거형. 
+*O하는 배경지도 종류에 맞도록 추가해서 사용한다.
+*/
+vw.v3d.BasemapType   = {
+  "GRAPHIC" : "", //
+  "GRAPHIC_GRAY" : "", //
+  "GRAPHIC_NIGHT" : ""//
+  "PHOTO" : ""//
+  "PHOTO_HYBRID" : ""//
+}
+
+/*Map 구성 요소인 control, 
+ *interaction을 초기에 어느 정도 구성할지 설정
+ */
+vw.v3d.DensityType  = {
+  "EMPTY" : "", //맵을 생성할 때, Contol, Interaction을 하나도 생성하지 않는다. 개발자가 필요한 것을 직접 추가하여 사용하도록 한다.
+  "BASIC" : "", //맵을 생성할 때, Control, Interaction을 많이 사용하는 표준적인 형태로 미리 생성한다.
+  "FULL" : ""//맵을 생성할 때, Control, Interaction을 최대로 생성하여 설정한다.
+}
+
+/*좌표 참조 체계.*/
+vw.v3d.CRS  = {
+  "code" : "EPSG:4396"
+}
+
+
+/*******************************************************************************
+ ** Globe 관련 클래스 시작(2015.10.05) 
+ ********************************************************************************/
+
+/*[3D 전용] 글로브 객체. Map 객체 내에서 생성되고, 개발자가 생성할 수 없다.*/
+vw.Globe = function(){
+  this.timer = {}; //글로브에 적용할 타이머
+  this.sun = {};   //태양 빌보드. 시간에 따라 위치가 결정된다.
+  this.moon = {};  //달 빌보드. 시간에 따라 위치가 결정된다.
+  this.light = {}; //태양이 광원으로 역할을 할 것인지를 결정한다. 태양의 위치에 따른다.
+  this.effects = {}; //날씨에 관한 설정을 하는 객체    
+   
+  /*ray와 글로브 표면과의 교차점을 구한다. ray는 맵 좌표.
+  @param ray: vw.Ray – 시선 방향  
+  @return vw.CoordZ
+  */
+  this.getSurfacePoint = function(ray){
+    return new vw.Coord();
+  }
+}
+
+/*[3D 전용] 글로브의 시간을 표현하는 클래스*/
+vw.Timer = function(){
+  this.enabled = false;//(D)false, true이면 onTick 이벤트가 발생하고, false이면 이벤트가 발생하지 않는다.
+  this.interval = 1;//(D)1, onTick 이벤트 발생 주기(sec). 이벤트 발생 주기마다 currentTime이 변한다.
+  this.currentTime = "";//글로브의 현재 시간
+  this.useSystemTime = false;//(D)false, 시스템 시간을 사용한다. 시스템 시간을 사용하면 currentTime이 시스템 시간에 맞춰 동작하고 multiplier 는 무시된다.
+  this.startTime = "";//시작 날짜와 시간
+  this.endTime = "";//끝 날짜와 시간
+  this.multiplier = 60;//(D)60, 시간의 흐름에 영향을 미치는 팩터. 1초마다 1초 * multiplier 만큼 currentTime이 변한다.
+}
+vw.Timer.EventType = {"onTick":""};
+
+
+/*[3D 전용] 하늘의 해를 표현하는 클래스*/
+vw.Sun = function(){
+  this.visible = false;//(D)false, 해가 보이는지를 설정하고 반환한다.
+  this.glow = 1;//(D)0.5(0~1), 해의 lens flare 정도를 설정한다.
+  
+}
+
+/*[3D 전용] 하늘의 달을 표현하는 클래스*/
+vw.Moon = function(){
+  this.visible = false;//(D)false, 달이 보이는지를 설정하고 반환한다.
+  this.phase = 1;//(D)0.5(Full Moon)(0~1), 달의 차오른 상태  
+}
+
+/*[3D 전용] 하늘의 광원을 표현하는 클래스로 광원의 위치는 해의
+ 현재 위치와 같다. 광원을 설정하면 그림자가 그려진다.*/
+vw.Light  = function(){
+  this.visible = false;//(D)false, 달이 보이는지를 설정하고 반환한다.
+  this.phase = 1;//(D)0.5(Full Moon)(0~1), 달의 차오른 상태  
+}
 
 
 
+/*******************************************************************************
+ ** Camera 관련 클래스 시작(2015.10.06) 
+ ********************************************************************************/
+
+/*카메라 객체. 맵의 뷰를 설정하고 조정한다. 
+ *맵 객체 내에서 생성되고, 개발자가 직접 생성하지 않는다.
+ */
+vw.v3d.Camera = function(){
+  this.home={};//카메라의 홈 위치
+  this.zoom={};//맵의 줌 레벨(2D)
+  this.rotation={};//맵의 회전 각도(2D)
+  this.minZoom=0;//(D)0, 최소 줌 레벨(2D)
+  this.maxZoom=19;//(D)0, 최대 줌 레벨(2D)
+  this.location=0;//카메라가 위치한 지점.
+  this.direction=0;//카메라의 축 방향, Direction member변경으로는 반응하지 않음
+  this.minAltitude=0;//(D)0, 최소 고도
+  this.maxAltitude=0;//(D)INFINIT, 최대 고도
+  this.animation=0;//(D/2D)Linear, (D/3D)Curve, move 등의 카메라 동작에 적용할 애니메이션 
+  this.action=0;//카메라의 동작 형태를 결정한다.
+  this.canMoveUnderTerrain=0;//(D)false, 카메라가 지표 아래로 이동할 수 있는지를 설정
+  this.distance=0;//카메라 위치와 바라보는 지표 사이의 거리, distance를 변경하면 location(카메라위치 – heading, tilt 유지)이 바뀐다. Target이 지표에 없으면 INFINIT로 처리
+
+  this.reset = function(){ //homepositon 으로 이동
+
+  }
+
+ /*카메라 direction을 유지한채로 direction 방향으로 amount 만큼 이동한다.
+  *@param direction: vw.Direction – 이동할 방향
+  *@param amount: double – 이동 거리(m)*/
+  this.move = function(direction, amount){ 
+
+  }
+
+/*position 위치로 카메라를 이동, 회전 한다.
+ *@param position: vw.CameraPosition – 새로운 위치*/
+  this.moveTo = function(position){ 
+
+  }
+
+/*카메라 위치를 유지한채로 target을 바라보도록 direction을 변경한다.
+ * target: vw.CoordZ – target의 좌표
+ */
+  this.lookTo = function(target){ 
+
+  }
+
+/*현재의 direction을 유지한채로 target을 바라보는 위치로 이동한다.
+* @param target: vw.Coord – target의 좌표
+* @param altitude: float – 카메라의 해발 고도
+*/
+  this.moveToLook = function(target, altitude){ 
+
+  }
+
+/*현재 direction방향으로 amount만큼 이동한다.
+ *@ amount: double – 이동거리(m)
+ */
+  this.zoom = function(amount){ 
+
+  }
+
+/*카메라의 각 축을 중심으로 amount(degree) 만큼 회전한다.
+ *@param amount: vw.CoordZ – 회전 정도를 지정한다. x: heading, y: tilt, z: roll*/
+  this.rotate = function(amount){ 
+
+  }  
+}
+vw.v3d.Camera.eventType ={
+  "onCenterChanged":""
+  "onZoomChanged":""
+  "onRotationChanged":""
+  "onMoveEnd":"",
+  "onRotationEnd":""
+};
+vw.v3d.Camera.prototype = new vw.Object();
 
 
 /*공통 유틸 관련 클래스*/
