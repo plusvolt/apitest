@@ -501,7 +501,7 @@ vw.Collection.prototype.getArray = function(){
  *@return integer : 인덱스
  */
 vw.Collection.prototype.indexOf = function(pItem){
-  var retrunValue = -1
+  var returnValue = -1
   for(var i = 0; i < this.count; i++){
     if(this.collectionProp[i] == pItem){
       return i;
@@ -681,10 +681,10 @@ vw.SiteAlignType = {
 vw.Event = function(){}
 
 /*값이 변경될 경우에 발생하는 이벤트의 핸들러
-@param (vw.Object)sender 이벤트가 발생한 객체
-@param (nativeObject)old 변경 전의 값
-@param (nativeObject)new 변경 후 값*/
-vw.ChangeEvent = function(sender, old, new){
+@param (vw.Object)pSender 이벤트가 발생한 객체
+@param (nativeObject)pOld 변경 전의 값
+@param (nativeObject)pNew 변경 후 값*/
+vw.ChangeEvent = function(pSender, pOld, pNew){
 
 }
 
@@ -693,7 +693,7 @@ vw.ChangeEvent = function(sender, old, new){
 @param (String)name 값이 변경된 개발자 지정 프로퍼티의 이름
 @param (nativeObject)old 변경 전의 값
 @param (nativeObject)new 변경 후 값*/
-vw.PropertyChangeEvent = function(sender, name, old, new){
+vw.PropertyChangeEvent = function(pSender, pName, pOld, pNew){
 
 }
 
@@ -704,7 +704,7 @@ vw.PropertyChangeEvent = function(sender, name, old, new){
 @param (nativeObject)old delete 또는 update 대상 아이템
 @param (nativeObject)new insert 또는 update 아이템
 */
-vw.CollectionEvent = function(sender, why, index, old, new){
+vw.CollectionEvent = function(pSender, pWhy, pIndex, pOld, pNew){
 
 }
 
@@ -718,7 +718,7 @@ vw.CollectionEvent = function(sender, why, index, old, new){
 @param (boolean)handled 이벤트가 처리되었는지를 설정한다. 
                 true를 설정하면 이벤트가 더이상 전파되지 않는다. 
 */
-vw.MapEvent = function(sender, pixel, wheel, ctrlKey, shiftKey, altKey, handled){
+vw.MapEvent = function(pSender, pPixel, pWheel, pCtrlKey, pShiftKey, pAltKey, pHandled){
 
 }
 
@@ -731,7 +731,7 @@ vw.MapEvent = function(sender, pixel, wheel, ctrlKey, shiftKey, altKey, handled)
 @param (boolean)handled 이벤트가 처리되었는지를 설정한다. 
                 true를 설정하면 이벤트가 더이상 전파되지 않는다. 
 */
-vw.KeyEvent = function(sender, keyCode, ctrlKey, shiftKey, altKey, handled){
+vw.KeyEvent = function(pSender, pKeyCode, pCtrlKey, pShiftKey, pAltKey, pHandled){
 
 }
 
@@ -798,26 +798,40 @@ vw.v3d.Map = function(container, opt){
 
 vw.v3d.Map.prototype = new vw.Object();
 
+/*
+ *객체 복제
+ *@return NamedSet 복사된 객체
+ */
+vw.v3d.Map.prototype.clone = function(){
+    if (null == this || "object" != typeof this) return this;
+    var copy = new vw.v3d.Map();
+    for (var key in this) {
+      copy[key] = vw.Util.unSafeClone(this[key]);
+    }
+    return copy;
+};
+
+
 /*주어진 화면 좌표에 해당하는 맵의 좌표를 반환한다.
  *@param point: vw.Pixel – 변환할 화면 좌표
  *@return vw.Coord 화면 좌표에 해당하는 맵좌표
  */
-vw.v3d.Map.prototype.pxcelToCoord = function(pPoint){
-  retrun new vw.Coord();
+vw.v3d.Map.prototype.pixelToCoord = function(pPoint){
+  return new vw.Coord();
 };
 
 /*주어진 맵의 좌표에 해당하는 화면 좌표를 반환한다.
  *@param point: vw.Coord – 변환할 맵 좌표
  *@return vw.Pixel 화면 좌표에 해당하는 맵좌표*/
 vw.v3d.Map.prototype.coordToPixel = function(point){
-  retrun new vw.Pixel();
+  return new vw.Pixel();
 }
 
 /*화면좌표의 extent를 맵 좌표의 extent로 변환하여 반환한다.
 extent: vw.Extent – 화면좌표로 구성된 extent*/
 vw.v3d.Map.prototype.screenExtentToMapExtent = function(extent){
   //2D전용
-  retrun false;
+  return false;
 }
 
 /*맵의 뷰포트의 크기를 다시 계산한다. 
@@ -867,8 +881,8 @@ vw.v3d.MapOptions = {
 vw.v3d.BasemapType   = {
   "GRAPHIC" : "", //
   "GRAPHIC_GRAY" : "", //
-  "GRAPHIC_NIGHT" : ""//
-  "PHOTO" : ""//
+  "GRAPHIC_NIGHT" : "",//
+  "PHOTO" : "",//
   "PHOTO_HYBRID" : ""//
 }
 
@@ -883,7 +897,7 @@ vw.v3d.DensityType  = {
 
 /*좌표 참조 체계.*/
 vw.v3d.CRS  = {
-  "code" : "EPSG:4396"
+  "code" : "EPSG:4326"
 }
 
 
@@ -1011,9 +1025,9 @@ vw.v3d.Camera = function(){
   }  
 }
 vw.v3d.Camera.eventType ={
-  "onCenterChanged":""
-  "onZoomChanged":""
-  "onRotationChanged":""
+  "onCenterChanged":"",
+  "onZoomChanged":"",
+  "onRotationChanged":"",
   "onMoveEnd":"",
   "onRotationEnd":""
 };
